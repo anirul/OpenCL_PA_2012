@@ -25,12 +25,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-float2 square_c(float2 c) {
-	return (float2)(c.x * c.x - c.y * c.y, 2.0f * c.y * c.x);
-}
-
 float2 mult_c(float2 c1, float2 c2) {
 	return (float2)(c1.x * c2.x - c1.y * c2.y, c1.y * c2.x + c1.x * c2.y);
+}
+
+float2 square_c(float2 c) {
+	return (float2)(c.x * c.x - c.y * c.y, 2.0f * c.y * c.x);
 }
 
 float2 add_c(float2 c1, float2 c2) {
