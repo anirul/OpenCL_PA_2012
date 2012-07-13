@@ -91,7 +91,7 @@ cl_floyd_warshall::cl_floyd_warshall(bool gpu) {
 void cl_floyd_warshall::init(const std::string& cl_file) {
    FILE* file = fopen(cl_file.c_str(), "rt");
    if (!file) throw std::runtime_error("could not open file " + cl_file);
-   const unsigned int BUFFER_SIZE = 4096;
+   const unsigned int BUFFER_SIZE = 1024 * 1024;
    size_t bytes_read = 0;
    std::string kernel__source = "";
    do {

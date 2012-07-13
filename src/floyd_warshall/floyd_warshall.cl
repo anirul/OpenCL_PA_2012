@@ -25,13 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-int pos2linear(
-      const int2 position,
-      const int2 m) 
-{
-   return position.y * m.x + position.x;
-}
-
 // mat the matrix
 // in_x column
 // in_y line
@@ -43,7 +36,7 @@ __kernel void floyd_warshall_buffer(
    const int2 d = (int2)(get_global_id(0), get_global_id(1));
    const int2 m = (int2)(get_global_size(0), get_global_size(1));
 
-   int position = d.y * m.x + d.x
+   int position = d.y * m.x + d.x;
    float val1 = mat[position];
    float val2 = in_x[d.x] + in_y[d.y];
    mat[position] = (val1 < val2) ? val1 : val2;
