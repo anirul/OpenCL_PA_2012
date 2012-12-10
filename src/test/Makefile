@@ -1,13 +1,17 @@
 # simple makefile for a test program
 
-ifeq ($(OSTYPE), darwin)
+UNAME = $(shell uname)
+
+ifeq ($(UNAME), Darwin)
 CC=clang
 CXX=clang++
 CFLAGS = -g -O0 -I/opt/local/include -I/opt/local/include/opencv2 -I..
 LIBS= -L/opt/local/lib/ \
 	-framework OpenCL \
 	-lboost_program_options -lboost_system
-else
+endif
+
+ifeq ($(UNAME), Linux)
 CC=gcc
 CXX=g++
 CFLAGS = -g -O0 -I/opt/local/include -I..

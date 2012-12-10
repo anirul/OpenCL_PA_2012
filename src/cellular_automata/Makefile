@@ -1,18 +1,23 @@
-# a simple makefile for cellular automata
+# once more a crappy makefile home made!
 
-ifeq ($(OSTYPE), darwin)
+UNAME = $(shell uname)
+
+ifeq ($(UNAME), Darwin)
 CC = clang
 CXX = clang++
 CFLAGS = -g -O0 -I/opt/local/include -I/usr/local/include -I..
 LIBS = -L/opt/local/lib/ \
 	-framework GLUT -framework Cocoa -framework OpenCL -framework OpenGL \
 	-lboost_program_options -lboost_system
-else
+endif
+
+ifeq ($(UNAME), Linux)
 CC = gcc
 CXX = g++
 CFLAGS = -g -O0 -I/usr/include -I/usr/local/include -I..
 LIBS = -L/usr/lib64 -L/usr/local/lib -lglut -lGL -lGLU -lOpenCL -lboost_program_options -lboost_system
 endif
+
 ALL=cellular_automata
 
 all: $(ALL)
