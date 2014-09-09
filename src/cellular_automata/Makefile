@@ -8,7 +8,7 @@ CXX = clang++
 CFLAGS = -g -O0 -I/opt/local/include -I/usr/local/include -I..
 LIBS = -L/opt/local/lib/ \
 	-framework GLUT -framework Cocoa -framework OpenCL -framework OpenGL \
-	-lboost_program_options -lboost_system
+	-lboost_program_options-mt -lboost_system-mt
 endif
 
 ifeq ($(UNAME), Linux)

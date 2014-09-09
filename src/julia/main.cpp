@@ -52,6 +52,7 @@ int main(int ac, char** av) {
 	unsigned int nb_loops = 1000;
 	float cx = -0.1f;
 	float cy = 0.651f;
+	float radius = 0.0f;
 	try {
 		options_description desc("Allowed options");
 		desc.add_options()
@@ -66,6 +67,7 @@ int main(int ac, char** av) {
 				"number of loops (only in no-window mode)")
 			("cx,x", value<float>(), "value of c(x)")
 			("cy,y", value<float>(), "value of c(y)")
+			("radius,r", value<float>(), "radius around c")
 			("no-window,n", "no window output")
 		;
 		variables_map vm;
@@ -105,6 +107,10 @@ int main(int ac, char** av) {
 			cy = vm["cy"].as<float>();
 		}
 		std::cout << "Cy              : " << cy << std::endl;
+		if (vm.count("radius")) {
+			radius = vm["radius"].as<float>();
+		}
+		std::cout << "radius          : " << radius << std::endl;
 		if (vm.count("no-window")) {
 			no_window = true;
 			std::cout << "Window          : no" << std::endl;
@@ -126,6 +132,7 @@ int main(int ac, char** av) {
 		if (!no_window) {
 			win_julia wjulia(
 				std::make_pair<float, float>(cx, cy),
+				radius,
 				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
 				enable_gpu,
 				enable_image,
@@ -142,6 +149,7 @@ int main(int ac, char** av) {
 			pjulia->init();
 			pjulia->setup(
 				std::make_pair<float, float>(cx, cy), 
+				radius,
 				std::make_pair<unsigned int, unsigned int>(max_height, max_width), 
 				max_iterations);
 			time_duration best_time = minutes(60);

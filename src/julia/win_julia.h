@@ -31,6 +31,7 @@
 class win_julia : public i_win {
 private :
 	std::pair<float, float> c_;
+	float r_;
 	std::pair<unsigned int, unsigned int> range_;
 	unsigned int max_iterations_;
 	std::vector<float> current_buffer_;
@@ -44,6 +45,7 @@ public :
 	// constructor size of image and image pointer
 	win_julia(
 		const std::pair<float, float>& c,
+		const float r,
 		const std::pair<unsigned int, unsigned int>& range,
 		bool gpu,
 		bool image,

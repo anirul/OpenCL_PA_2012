@@ -39,6 +39,9 @@ private :
 	cl_uint mdx_;
 	cl_uint mdy_;
 	cl_float2 cl_c_;
+	std::pair<float, float> c_;
+	float r_;
+	float angle_;
 	cl_uint max_iterations_;
 	unsigned int device_used_;
 	std::vector<cl::Device> devices_;
@@ -54,6 +57,7 @@ public :
 	void init();
 	void setup(
 		const std::pair<float, float>& c,
+		const float r,
 		const std::pair<unsigned int, unsigned int>& s,
 		unsigned int max_iterations);
 	void prepare_buffer();

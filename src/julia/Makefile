@@ -1,12 +1,14 @@
 # a simple makefile for julia
 
-ifeq ($(OSTYPE), darwin)
+OSTYPE = $(shell uname -s)
+
+ifeq ($(OSTYPE), Darwin)
 CC = clang
 CXX = clang++
 CFLAGS = -O3 -I/opt/local/include -I/usr/local/include -I..
 LIBS = -L/opt/local/lib/ \
 	-framework GLUT -framework Cocoa -framework OpenCL -framework OpenGL \
-	-lboost_program_options -lboost_system
+	-lboost_program_options-mt -lboost_system-mt
 else
 CC = gcc
 CXX = g++

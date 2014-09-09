@@ -40,12 +40,20 @@
 using namespace boost::posix_time;
 
 cl_julia::cl_julia(bool gpu) {
+	angle_ = 0.0f;
 	//setup devices and context
 	std::vector<cl::Platform> platforms;
 	err_ = cl::Platform::get(&platforms);
-	device_used_ = 0;
 	err_ = platforms[0].getDevices((gpu) ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, &devices_);
-	int t = devices_.front().getInfo<CL_DEVICE_TYPE>();
+	int t = devices_.back().getInfo<CL_DEVICE_TYPE>();
+	int i = 0;
+	for (auto device : devices_) {
+		std::cout << "device name [" << i << "] : " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+		++i;
+	}
+	// take the last device (work around Intel GPU)
+	device_used_ = i - 1;
+	std::cout << "device used     : " << device_used_ << std::endl;
 	try {
 		throw cl::Error(0, "cheat pass");
 		#if defined (__APPLE__) || defined(MACOSX)
@@ -111,22 +119,23 @@ void cl_julia::init() {
 		err_ = program_.build(devices_);
 	} catch (cl::Error er) {
 		std::cout << "build status    : " 
-			<< program_.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices_[0]) << std::endl;
+			<< program_.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices_[device_used_]) << std::endl;
 		std::cout << "build options   : " 
-			<< program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices_[0]) << std::endl;
+			<< program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices_[device_used_]) << std::endl;
 		std::cout << "build log       : " 
-			<< program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices_[0]) << std::endl;
+			<< program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices_[device_used_]) << std::endl;
 		throw er;
 	}
 }
 
 void cl_julia::setup(
 	const std::pair<float, float>& c,
+	const float r,
 	const std::pair<unsigned int, unsigned int>& s,
 	unsigned int max_iterations) 
 {
-	cl_c_.x = c.first;
-	cl_c_.y = c.second;
+	r_ = r;
+	c_ = c;
 	max_iterations_ = max_iterations;
 	mdx_ = s.first;
 	mdy_ = s.second;
@@ -143,6 +152,10 @@ void cl_julia::prepare_buffer() {
 		NULL, 
 		&err_);
 	queue_.finish();
+	//prepare new value for c
+	angle_ += 0.01f;
+	cl_c_.x = c_.first + r_ * sin(angle_);
+	cl_c_.y = c_.second + r_ * cos(angle_);
 	//set the arguements of our kernel
 	err_ = kernel_.setArg(0, cl_buffer_out_);
 	err_ = kernel_.setArg(1, cl_c_);
@@ -172,6 +185,10 @@ void cl_julia::prepare_image() {
 		NULL,
 		&err_);
 	queue_.finish();
+	//prepare new value for c
+	angle_ += 0.01f;
+	cl_c_.x = c_.first + r_ * sin(angle_);
+	cl_c_.y = c_.second + r_ * cos(angle_);
 	//set the arguements of our kernel_
 	err_ = kernel_.setArg(0, cl_image_out_);
 	err_ = kernel_.setArg(1, cl_c_);

@@ -8,7 +8,7 @@ CXX=clang++
 CFLAGS = -g -O0 -I/opt/local/include -I/opt/local/include/opencv2 -I..
 LIBS= -L/opt/local/lib/ \
 	-framework OpenCL \
-	-lboost_program_options -lboost_system
+	-lboost_program_options-mt -lboost_system-mt
 endif
 
 ifeq ($(UNAME), Linux)

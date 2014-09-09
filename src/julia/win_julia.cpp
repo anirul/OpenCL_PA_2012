@@ -50,11 +50,13 @@ using namespace boost::posix_time;
 
 win_julia::win_julia(
 	const std::pair<float, float>& c,
+	const float r,
 	const std::pair<unsigned int, unsigned int>& range,
 	bool gpu,
 	bool image,
 	unsigned int max_iterations)
 	: 	c_(c),
+		r_(r),
 		range_(range),
 		max_iterations_(max_iterations),
 		p_julia_(NULL),
@@ -72,7 +74,7 @@ void win_julia::init() {
 	glGenTextures(1, &texture_id_);
 	p_julia_ = new cl_julia(gpu_);
 	p_julia_->init();
-	p_julia_->setup(c_, range_, max_iterations_);
+	p_julia_->setup(c_, r_, range_, max_iterations_);
 } 
 
 void win_julia::display() {
