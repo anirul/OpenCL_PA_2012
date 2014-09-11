@@ -39,7 +39,7 @@
 
 using namespace boost::posix_time;
 
-cl_julia::cl_julia(bool gpu) {
+cl_julia::cl_julia(bool gpu, int device) {
 	angle_ = 0.0f;
 	//setup devices and context
 	std::vector<cl::Platform> platforms;
@@ -52,7 +52,7 @@ cl_julia::cl_julia(bool gpu) {
 		++i;
 	}
 	// take the last device (work around Intel GPU)
-	device_used_ = i - 1;
+	device_used_ = device;
 	std::cout << "device used     : " << device_used_ << std::endl;
 	try {
 		throw cl::Error(0, "cheat pass");
@@ -111,18 +111,18 @@ void cl_julia::init() {
 	} while (bytes_read != 0);
 	fclose(file);
 	cl::Program::Sources source(
-		1, 
-		std::make_pair(kernel_source.c_str(), 
+		1,
+		std::make_pair(kernel_source.c_str(),
 		kernel_source.size()));
 	program_ = cl::Program(context_, source);
 	try {
 		err_ = program_.build(devices_);
 	} catch (cl::Error er) {
-		std::cout << "build status    : " 
+		std::cout << "build status    : "
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices_[device_used_]) << std::endl;
-		std::cout << "build options   : " 
+		std::cout << "build options   : "
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices_[device_used_]) << std::endl;
-		std::cout << "build log       : " 
+		std::cout << "build log       : "
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices_[device_used_]) << std::endl;
 		throw er;
 	}
@@ -132,7 +132,7 @@ void cl_julia::setup(
 	const std::pair<float, float>& c,
 	const float r,
 	const std::pair<unsigned int, unsigned int>& s,
-	unsigned int max_iterations) 
+	unsigned int max_iterations)
 {
 	r_ = r;
 	c_ = c;
@@ -146,10 +146,10 @@ void cl_julia::prepare_buffer() {
 	kernel_ = cl::Kernel(program_, "julia_buffer", &err_);
 	//initialize our CPU memory arrays, send them to the device and set the kernel arguements
 	cl_buffer_out_ = cl::Buffer(
-		context_, 
-		CL_MEM_WRITE_ONLY, 
-		sizeof(float) * total_size_, 
-		NULL, 
+		context_,
+		CL_MEM_WRITE_ONLY,
+		sizeof(float) * total_size_,
+		NULL,
 		&err_);
 	queue_.finish();
 	//prepare new value for c
@@ -194,7 +194,7 @@ void cl_julia::prepare_image() {
 	err_ = kernel_.setArg(1, cl_c_);
 	err_ = kernel_.setArg(2, max_iterations_);
 	//Wait for the command queue to finish these commands before proceeding
-	queue_.finish();	
+	queue_.finish();
 }
 
 time_duration cl_julia::run_buffer(std::vector<float>& out) {
@@ -204,21 +204,21 @@ time_duration cl_julia::run_buffer(std::vector<float>& out) {
 		out.resize(total_size_);
 	before = microsec_clock::universal_time();
 	err_ = queue_.enqueueNDRangeKernel(
-		kernel_, 
-		cl::NullRange, 
-		cl::NDRange(mdx_, mdy_), 
-		cl::NullRange, 
-		NULL, 
-		&event_); 
+		kernel_,
+		cl::NullRange,
+		cl::NDRange(mdx_, mdy_),
+		cl::NullRange,
+		NULL,
+		&event_);
 	queue_.finish();
 	after = microsec_clock::universal_time();
 	err_ = queue_.enqueueReadBuffer(
-		cl_buffer_out_, 
-		CL_TRUE, 
-		0, 
-		sizeof(float) * total_size_, 
-		&out[0], 
-		NULL, 
+		cl_buffer_out_,
+		CL_TRUE,
+		0,
+		sizeof(float) * total_size_,
+		&out[0],
+		NULL,
 		&event_);
 	queue_.finish();
 	return (after - before);
@@ -231,23 +231,22 @@ time_duration cl_julia::run_image(std::vector<char>& out) {
 		out.resize(total_size_);
 	before = microsec_clock::universal_time();
 	err_ = queue_.enqueueNDRangeKernel(
-		kernel_, 
-		cl::NullRange, 
-		cl::NDRange(mdx_, mdy_), 
-		cl::NullRange, 
-		NULL, 
-		&event_); 
+		kernel_,
+		cl::NullRange,
+		cl::NDRange(mdx_, mdy_),
+		cl::NullRange,
+		NULL,
+		&event_);
 	queue_.finish();
 	after = microsec_clock::universal_time();
 	err_ = queue_.enqueueReadImage(
-		cl_image_out_, 
-		CL_TRUE, 
-		origin_, 
-		region_, 
-		mdx_ * sizeof(char), 
-		0, 
+		cl_image_out_,
+		CL_TRUE,
+		origin_,
+		region_,
+		mdx_ * sizeof(char),
+		0,
 		(void*)&out[0]);
 	queue_.finish();
 	return (after - before);
 }
-

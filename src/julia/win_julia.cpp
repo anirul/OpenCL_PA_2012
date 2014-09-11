@@ -53,6 +53,7 @@ win_julia::win_julia(
 	const float r,
 	const std::pair<unsigned int, unsigned int>& range,
 	bool gpu,
+	int device,
 	bool image,
 	unsigned int max_iterations)
 	: 	c_(c),
@@ -61,6 +62,7 @@ win_julia::win_julia(
 		max_iterations_(max_iterations),
 		p_julia_(NULL),
 		gpu_(gpu),
+		device_(device),
 		image_(image)
 {
 	best_time_ = minutes(60);
@@ -72,10 +74,10 @@ void win_julia::init() {
 	glClearColor(0, 0, 0, 0);
 	gluOrtho2D(-1, 1, -1, 1);
 	glGenTextures(1, &texture_id_);
-	p_julia_ = new cl_julia(gpu_);
+	p_julia_ = new cl_julia(gpu_, device_);
 	p_julia_->init();
 	p_julia_->setup(c_, r_, range_, max_iterations_);
-} 
+}
 
 void win_julia::display() {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -96,7 +98,7 @@ void win_julia::display() {
 	glDisable(GL_TEXTURE_2D);
 	glFlush();
 	glutPostRedisplay();
-} 
+}
 
 void win_julia::idle() {
 	glFinish();
@@ -118,29 +120,29 @@ void win_julia::idle() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (image_) {
 		glTexImage2D(
-			GL_TEXTURE_2D, 
-			0, 
-			1, 
-			range_.first, 
-			range_.second, 
-			0, 
-			GL_LUMINANCE, 
-			GL_UNSIGNED_BYTE, 
+			GL_TEXTURE_2D,
+			0,
+			1,
+			range_.first,
+			range_.second,
+			0,
+			GL_LUMINANCE,
+			GL_UNSIGNED_BYTE,
 			&current_image_[0]);
 	} else {
 		glTexImage2D(
-			GL_TEXTURE_2D, 
-			0, 
-			1, 
-			range_.first, 
-			range_.second, 
-			0, 
-			GL_LUMINANCE, 
-			GL_FLOAT, 
+			GL_TEXTURE_2D,
+			0,
+			1,
+			range_.first,
+			range_.second,
+			0,
+			GL_LUMINANCE,
+			GL_FLOAT,
 			&current_buffer_[0]);
 	}
 	glFinish();
-} 
+}
 
 void win_julia::reshape(int w, int h) {
 	glMatrixMode(GL_PROJECTION);
@@ -148,13 +150,13 @@ void win_julia::reshape(int w, int h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_MODELVIEW);
 	glFinish();
-} 
+}
 
-void win_julia::mouse_event(int button, int state, int x, int y) {} 
+void win_julia::mouse_event(int button, int state, int x, int y) {}
 
-void win_julia::mouse_move(int x, int y) {} 
+void win_julia::mouse_move(int x, int y) {}
 
-void win_julia::keyboard(unsigned char key, int x, int y) {} 
+void win_julia::keyboard(unsigned char key, int x, int y) {}
 
 void win_julia::finish() {
 	if (p_julia_) {
@@ -162,5 +164,4 @@ void win_julia::finish() {
 		p_julia_ = NULL;
 	}
 	std::cout << std::endl;
-} 
-
+}

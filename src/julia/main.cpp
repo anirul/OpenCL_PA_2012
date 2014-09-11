@@ -46,6 +46,7 @@ int main(int ac, char** av) {
 	bool no_window = false;
 	bool enable_gpu = true;
 	bool enable_image = false;
+	int device = 0;
 	unsigned int max_height = 512;
 	unsigned int max_width = 512;
 	unsigned int max_iterations = 1000;
@@ -59,11 +60,12 @@ int main(int ac, char** av) {
 			("help,h", "produce help message")
 			("opencl-cpu,c", "compute using openCL on CPU")
 			("opencl-gpu,g", "compute using openCL on GPU")
-			("image,m", "use OpenCL Image2D instead of buffer") 
+			("device,d", value<unsigned int>(), "device to be selected")
+			("image,m", "use OpenCL Image2D instead of buffer")
 			("width,w", value<unsigned int>(), "image width")
 			("height,t", value<unsigned int>(), "image height")
 			("iterations,i", value<unsigned int>(), "julia iterations")
-			("loop,l", value<unsigned int>(), 
+			("loop,l", value<unsigned int>(),
 				"number of loops (only in no-window mode)")
 			("cx,x", value<float>(), "value of c(x)")
 			("cy,y", value<float>(), "value of c(y)")
@@ -82,11 +84,11 @@ int main(int ac, char** av) {
 		} else if (vm.count("opencl-gpu")) {
 			enable_gpu = true;
 			std::cout << "OpenCL (GPU)    : enable" << std::endl;
-		} 
+		}
 		if (vm.count("width")) {
 			max_width = vm["width"].as<unsigned int>();
 		}
-		std::cout << "Width           : " << max_width << std::endl; 
+		std::cout << "Width           : " << max_width << std::endl;
 		if (vm.count("height")) {
 			max_height = vm["height"].as<unsigned int>();
 		}
@@ -124,6 +126,9 @@ int main(int ac, char** av) {
 			enable_image = false;
 			std::cout << "OpenCL Image2D  : disable" << std::endl;
 		}
+		if (vm.count("device")) {
+			device = vm["device"].as<unsigned int>();
+		}
 	} catch (std::exception& e) {
 		std::cerr << "exception     : " << e.what() << std::endl;
 		return -1;
@@ -135,6 +140,7 @@ int main(int ac, char** av) {
 				radius,
 				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
 				enable_gpu,
+				device,
 				enable_image,
 				max_iterations);
 			glut_win* pwin = glut_win::instance(
@@ -145,12 +151,12 @@ int main(int ac, char** av) {
 		} else {
 			std::vector<float> vec_buffer(max_width * max_height);
 			std::vector<char> vec_image(max_width * max_height);
-			cl_julia* pjulia = new cl_julia(enable_gpu);
+			cl_julia* pjulia = new cl_julia(enable_gpu, device);
 			pjulia->init();
 			pjulia->setup(
-				std::make_pair<float, float>(cx, cy), 
+				std::make_pair<float, float>(cx, cy),
 				radius,
-				std::make_pair<unsigned int, unsigned int>(max_height, max_width), 
+				std::make_pair<unsigned int, unsigned int>(max_height, max_width),
 				max_iterations);
 			time_duration best_time = minutes(60);
 			for (int i = 0; i < nb_loops; ++i) {
@@ -163,12 +169,12 @@ int main(int ac, char** av) {
 					actual_time = pjulia->run_buffer(vec_buffer);
 				}
 				if (actual_time < best_time) best_time = actual_time;
-				std::cout 
+				std::cout
 					<< "\riteration [" << i + 1 << "/" << nb_loops << "] : "
 					<< "actual_time : " << actual_time;
 				std::cout.flush();
 			}
-			std::cout << std::endl << "Finished : [" << nb_loops << "] Best time : " 
+			std::cout << std::endl << "Finished : [" << nb_loops << "] Best time : "
 				<< best_time << std::endl;
 			delete pjulia;
 		}
@@ -178,7 +184,6 @@ int main(int ac, char** av) {
 	} catch (std::exception& ex) {
 		std::cerr << "exception (STL) : " << ex.what() << std::endl;
 		return -2;
-	} 
+	}
 	return 0;
 }
-

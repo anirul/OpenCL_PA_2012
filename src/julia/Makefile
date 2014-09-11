@@ -1,8 +1,8 @@
 # a simple makefile for julia
 
-OSTYPE = $(shell uname -s)
+UNAME = $(shell uname -s)
 
-ifeq ($(OSTYPE), Darwin)
+ifeq ($(UNAME), Darwin)
 CC = clang
 CXX = clang++
 CFLAGS = -O3 -I/opt/local/include -I/usr/local/include -I..

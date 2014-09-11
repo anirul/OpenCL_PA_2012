@@ -53,7 +53,7 @@ private :
 	cl_int err_;
 	cl::Event event_;
 public :
-	cl_julia(bool gpu); 
+	cl_julia(bool gpu, int device = 0); 
 	void init();
 	void setup(
 		const std::pair<float, float>& c,
@@ -67,4 +67,3 @@ public :
 };
 
 #endif // CL_JULIA_HEADER_DEFINED
-

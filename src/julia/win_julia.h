@@ -24,7 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef WIN_JULIA_HEADER_DEFINED
 #define WIN_JULIA_HEADER_DEFINED
 
@@ -38,6 +38,7 @@ private :
 	std::vector<char> current_image_;
 	cl_julia* p_julia_;
 	bool gpu_;
+    int device_;
 	bool image_;
 	unsigned int texture_id_;
 	boost::posix_time::time_duration best_time_;
@@ -48,6 +49,7 @@ public :
 		const float r,
 		const std::pair<unsigned int, unsigned int>& range,
 		bool gpu,
+        int device,
 		bool image,
 		unsigned int max_iterations);
 	virtual ~win_julia();
