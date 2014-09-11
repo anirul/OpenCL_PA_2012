@@ -47,11 +47,11 @@ private :
 	cl::CommandQueue queue_;
 	cl::Program program_;
 	cl::Kernel kernel_;
-	// debugging variables	
+	// debugging variables
 	cl_int err_;
 	cl::Event event_;
 public :
-	cl_cellular_automata(bool gpu);
+	cl_cellular_automata(bool gpu, unsigned int device = 0);
 	void init(const std::string& cl_file);
 	// if change size
 	void setup(
@@ -66,4 +66,3 @@ public :
 };
 
 #endif // CL_cellular_automata_HEADER_DEFINED
-

@@ -36,6 +36,7 @@ private :
 	std::vector<char> current_image_;
 	cl_cellular_automata* p_cellular_automata_;
 	bool gpu_;
+	unsigned int device_;
 	bool image_;
 	unsigned int texture_id_;
 	std::string cl_file_;
@@ -47,12 +48,14 @@ public :
 		const std::vector<float>& initial_buffer,
 		const std::string& cl_file,
 		bool gpu,
+		unsigned int device,
 		unsigned int max_iterations);
 	win_cellular_automata(
 		const std::pair<unsigned int, unsigned int>& range,
 		const std::vector<char>& initial_image,
 		const std::string& cl_file,
 		bool gpu,
+		unsigned int device,
 		unsigned int max_iterations);
 	virtual ~win_cellular_automata();
 public :

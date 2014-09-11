@@ -49,7 +49,7 @@ cl_julia::cl_julia(bool gpu, int device) {
 	int i = 0;
 	for (auto device : devices_) {
 		std::cout << "device name [" << i << "] : " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
-		++i;
+		i++;
 	}
 	// take the last device (work around Intel GPU)
 	device_used_ = device;

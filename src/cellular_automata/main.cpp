@@ -45,6 +45,7 @@ using namespace boost::posix_time;
 int main(int ac, char** av) {
 	bool no_window = false;
 	bool enable_gpu = true;
+	int device = 0;
 	bool enable_image = false;
 	unsigned int max_height = 512;
 	unsigned int max_width = 512;
@@ -58,13 +59,14 @@ int main(int ac, char** av) {
 			("help,h", "produce help message")
 			("opencl-cpu,c", "compute using openCL on CPU")
 			("opencl-gpu,g", "compute using openCL on GPU (default)")
-			("image,m", "use OpenCL Image2D instead of buffer") 
+			("device,d", value<unsigned int>(), "device to be used")
+			("image,m", "use OpenCL Image2D instead of buffer")
 			("width,w", value<unsigned int>(), "image width")
 			("height,t", value<unsigned int>(), "image height")
 			("iterations,i", value<unsigned int>(), "julia iterations")
-			("cl-file,f", value<std::string>(), 
+			("cl-file,f", value<std::string>(),
 				"OpenCL file to be compiled (default : life.cl)")
-			("loop,l", value<unsigned int>(), 
+			("loop,l", value<unsigned int>(),
 				"number of loops (only in no-window mode)")
 			("no-window,n", "no window output")
 		;
@@ -77,11 +79,11 @@ int main(int ac, char** av) {
 		if (vm.count("opencl-cpu")) {
 			enable_gpu = false;
 			std::cout << "OpenCL (CPU)    : enable" << std::endl;
-		} 
+		}
 		if (vm.count("opencl-gpu")) {
 			enable_gpu = true;
 			std::cout << "OpenCL (GPU)    : enable" << std::endl;
-		} 
+		}
 		if (vm.count("cl-file")) {
 			cl_file = vm["cl-file"].as<std::string>();
 			std::cout << "OpenCL file     : " << cl_file << std::endl;
@@ -89,7 +91,7 @@ int main(int ac, char** av) {
 		if (vm.count("width")) {
 			max_width = vm["width"].as<unsigned int>();
 		}
-		std::cout << "Width           : " << max_width << std::endl; 
+		std::cout << "Width           : " << max_width << std::endl;
 		if (vm.count("height")) {
 			max_height = vm["height"].as<unsigned int>();
 		}
@@ -114,6 +116,9 @@ int main(int ac, char** av) {
 			enable_image = false;
 			std::cout << "OpenCL Image2D  : disable" << std::endl;
 		}
+		if (vm.count("device")) {
+			device = vm["device"].as<unsigned int>();
+		}
 		// create the initial state (random)
 		std::vector<float> initial_buffer;
 		std::vector<char> initial_image;
@@ -136,6 +141,7 @@ int main(int ac, char** av) {
 					initial_image,
 					cl_file,
 					enable_gpu,
+					device,
 					max_iterations);
 			else
 				pwca = new win_cellular_automata(
@@ -143,6 +149,7 @@ int main(int ac, char** av) {
 					initial_buffer,
 					cl_file,
 					enable_gpu,
+					device,
 					max_iterations);
 			glut_win* pwin = glut_win::instance(
 				std::string("Cellular Automata"),
@@ -151,7 +158,7 @@ int main(int ac, char** av) {
 			pwin->run();
 			delete pwca;
 		} else {
-			cl_cellular_automata cca(enable_gpu);
+			cl_cellular_automata cca(enable_gpu, device);
 			cca.init("life.cl");
 			cca.setup(
 				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
@@ -167,25 +174,24 @@ int main(int ac, char** av) {
 					actual_time = cca.run_buffer(initial_buffer);
 				}
 				if (actual_time < best_time) best_time = actual_time;
-				std::cout 
+				std::cout
 					<< "\riteration [" << i + 1 << "/" << nb_loops << "] : "
 					<< "actual_time : " << actual_time;
 				std::cout.flush();
 			}
-			std::cout << std::endl 
-				<< "Finished : [" << nb_loops << "] Best time : " << best_time 
+			std::cout << std::endl
+				<< "Finished : [" << nb_loops << "] Best time : " << best_time
 				<< std::endl;
 		}
 	// error handling
 	} catch (cl::Error er) {
-		std::cerr 
-			<< "exception (CL)  : " << er.what() 
+		std::cerr
+			<< "exception (CL)  : " << er.what()
 			<< "(" << er << ")" << std::endl;
-		return -2;		
+		return -2;
 	} catch (std::exception& ex) {
 		std::cerr << "exception (std) : " << ex.what() << std::endl;
 		return -1;
 	}
 	return 0;
 }
-

@@ -53,10 +53,12 @@ win_cellular_automata::win_cellular_automata(
 	const std::vector<float>& initial_buffer,
 	const std::string& cl_file,
 	bool gpu,
+	unsigned int device,
 	unsigned int max_iterations)
 	:	range_(range),
 		max_iterations_(max_iterations),
 		gpu_(gpu),
+		device_(device),
 		image_(false),
 		p_cellular_automata_(NULL),
 		cl_file_(cl_file)
@@ -70,10 +72,12 @@ win_cellular_automata::win_cellular_automata(
 	const std::vector<char>& initial_image,
 	const std::string& cl_file,
 	bool gpu,
+	unsigned int device,
 	unsigned int max_iterations)
 	:	range_(range),
 		max_iterations_(max_iterations),
 		gpu_(gpu),
+		device_(device),
 		image_(true),
 		p_cellular_automata_(NULL),
 		cl_file_(cl_file)
@@ -89,7 +93,7 @@ void win_cellular_automata::init() {
 	glClearColor(0, 0, 0, 0);
 	gluOrtho2D(-1, 1, -1, 1);
 	glGenTextures(1, &texture_id_);
-	p_cellular_automata_ = new cl_cellular_automata(gpu_);
+	p_cellular_automata_ = new cl_cellular_automata(gpu_, device_);
 	p_cellular_automata_->init(cl_file_);
 	p_cellular_automata_->setup(range_, max_iterations_);
 }
@@ -113,7 +117,7 @@ void win_cellular_automata::display() {
 	glDisable(GL_TEXTURE_2D);
 	glFlush();
 	glutPostRedisplay();
-} 
+}
 
 void win_cellular_automata::idle() {
 	glFinish();
@@ -135,29 +139,29 @@ void win_cellular_automata::idle() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	if (image_) {
 		glTexImage2D(
-			GL_TEXTURE_2D, 
-			0, 
-			1, 
-			range_.first, 
-			range_.second, 
-			0, 
-			GL_LUMINANCE, 
-			GL_UNSIGNED_BYTE, 
+			GL_TEXTURE_2D,
+			0,
+			1,
+			range_.first,
+			range_.second,
+			0,
+			GL_LUMINANCE,
+			GL_UNSIGNED_BYTE,
 			&current_image_[0]);
 	} else {
 		glTexImage2D(
-			GL_TEXTURE_2D, 
-			0, 
-			1, 
-			range_.first, 
-			range_.second, 
-			0, 
-			GL_LUMINANCE, 
-			GL_FLOAT, 
+			GL_TEXTURE_2D,
+			0,
+			1,
+			range_.first,
+			range_.second,
+			0,
+			GL_LUMINANCE,
+			GL_FLOAT,
 			&current_buffer_[0]);
 	}
 	glFinish();
-} 
+}
 
 void win_cellular_automata::reshape(int w, int h) {
 	glMatrixMode(GL_PROJECTION);
@@ -167,11 +171,11 @@ void win_cellular_automata::reshape(int w, int h) {
 	glFinish();
 }
 
-void win_cellular_automata::mouse_event(int button, int state, int x, int y) {} 
+void win_cellular_automata::mouse_event(int button, int state, int x, int y) {}
 
-void win_cellular_automata::mouse_move(int x, int y) {} 
+void win_cellular_automata::mouse_move(int x, int y) {}
 
-void win_cellular_automata::keyboard(unsigned char key, int x, int y) {} 
+void win_cellular_automata::keyboard(unsigned char key, int x, int y) {}
 
 void win_cellular_automata::finish() {
 	if (p_cellular_automata_) {
@@ -180,4 +184,3 @@ void win_cellular_automata::finish() {
 	}
 	std::cout << std::endl;
 }
-

@@ -39,13 +39,20 @@
 
 using namespace boost::posix_time;
 
-cl_cellular_automata::cl_cellular_automata(bool gpu) {
+cl_cellular_automata::cl_cellular_automata(bool gpu, unsigned int device) {
 	//setup devices_ and context_
 	std::vector<cl::Platform> platforms;
 	err_ = cl::Platform::get(&platforms);
-	device_used_ = 0;
 	err_ = platforms[0].getDevices((gpu) ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU, &devices_);
 	int t = devices_.front().getInfo<CL_DEVICE_TYPE>();
+	int i = 0;
+	for (auto device : devices_) {
+		std::cout << "device name [" << i << "] : " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+		i++;
+	}
+	// take the last device (work around Intel GPU)
+	device_used_ = device;
+	std::cout << "device used     : " << device_used_ << std::endl;
 	try {
 		throw cl::Error(0, "cheat pass");
 		#if defined (__APPLE__) || defined(MACOSX)
@@ -85,7 +92,7 @@ cl_cellular_automata::cl_cellular_automata(bool gpu) {
 		context_ = cl::Context((gpu) ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU , properties);
 		devices_ = context_.getInfo<CL_CONTEXT_DEVICES>();
 	}
-	queue_ = cl::CommandQueue(context_, devices_[device_used_], 0, &err_);	
+	queue_ = cl::CommandQueue(context_, devices_[device_used_], 0, &err_);
 }
 
 void cl_cellular_automata::init(const std::string& cl_file) {
@@ -102,16 +109,16 @@ void cl_cellular_automata::init(const std::string& cl_file) {
 	} while (bytes_read != 0);
 	fclose(file);
 	cl::Program::Sources source(
-		1, 
-		std::make_pair(kernel__source.c_str(), 
+		1,
+		std::make_pair(kernel__source.c_str(),
 		kernel__source.size()));
 	program_ = cl::Program(context_, source);
 	try {
 		err_ = program_.build(devices_);
 	} catch (cl::Error er) {
-		std::cerr << "build status    : " 
+		std::cerr << "build status    : "
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices_[0]) << std::endl;
-		std::cerr << "build options   : " 
+		std::cerr << "build options   : "
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices_[0]) << std::endl;
 		std::cerr << "build log       : "  << std::endl
 			<< program_.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices_[0]) << std::endl;
@@ -121,7 +128,7 @@ void cl_cellular_automata::init(const std::string& cl_file) {
 
 void cl_cellular_automata::setup(
 	const std::pair<unsigned int, unsigned int>& s,
-	unsigned int max_iterations) 
+	unsigned int max_iterations)
 {
 	max_iterations_ = max_iterations;
 	mdx_ = s.first;
@@ -135,16 +142,16 @@ void cl_cellular_automata::prepare_buffer(const std::vector<float>& in) {
 	kernel_ = cl::Kernel(program_, "life_buffer", &err_);
 	//initialize our CPU memory arrays, send them to the device and set the kernel_ arguements
 	cl_buffer_in_ = cl::Buffer(
-		context_, 
-		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-		sizeof(float) * total_size_, 
-		(void*)&in[0], 
+		context_,
+		CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+		sizeof(float) * total_size_,
+		(void*)&in[0],
 		&err_);
 	cl_buffer_out_ = cl::Buffer(
-		context_, 
-		CL_MEM_WRITE_ONLY, 
-		sizeof(float) * total_size_, 
-		NULL, 
+		context_,
+		CL_MEM_WRITE_ONLY,
+		sizeof(float) * total_size_,
+		NULL,
 		&err_);
 	queue_.finish();
 	//set the arguements of our kernel_
@@ -152,7 +159,7 @@ void cl_cellular_automata::prepare_buffer(const std::vector<float>& in) {
 	err_ = kernel_.setArg(1, cl_buffer_out_);
 	err_ = kernel_.setArg(2, max_iterations_);
 	//Wait for the command queue_ to finish these commands before proceeding
-	queue_.finish();	
+	queue_.finish();
 }
 
 void cl_cellular_automata::prepare_image(const std::vector<char>& in) {
@@ -204,12 +211,12 @@ time_duration cl_cellular_automata::run_buffer(std::vector<float>& out) {
 	for (int i = 0; i < max_iterations_; ++i) {
 		// make the computation
 		err_ = queue_.enqueueNDRangeKernel(
-			kernel_, 
-			cl::NullRange, 
-				cl::NDRange(mdx_, mdy_), 
-			cl::NullRange, 
-			NULL, 
-			&event_); 
+			kernel_,
+			cl::NullRange,
+				cl::NDRange(mdx_, mdy_),
+			cl::NullRange,
+			NULL,
+			&event_);
 		queue_.finish();
 		// swap the buffers (except for the last time)
 		if (i < (max_iterations_ - 1)) {
@@ -226,12 +233,12 @@ time_duration cl_cellular_automata::run_buffer(std::vector<float>& out) {
 	}
 	after = microsec_clock::universal_time();
 	err_ = queue_.enqueueReadBuffer(
-		cl_buffer_out_, 
-		CL_TRUE, 
-		0, 
-		sizeof(float) * total_size_, 
-		&out[0], 
-		NULL, 
+		cl_buffer_out_,
+		CL_TRUE,
+		0,
+		sizeof(float) * total_size_,
+		&out[0],
+		NULL,
 		&event_);
 	queue_.finish();
 	return (after - before);
@@ -246,12 +253,12 @@ time_duration cl_cellular_automata::run_image(std::vector<char>& out) {
 	for (int i = 0; i < max_iterations_; ++i) {
 		// make the computation
 		err_ = queue_.enqueueNDRangeKernel(
-			kernel_, 
-			cl::NullRange, 
-			cl::NDRange(mdx_, mdy_), 
-			cl::NullRange, 
-			NULL, 
-			&event_); 
+			kernel_,
+			cl::NullRange,
+			cl::NDRange(mdx_, mdy_),
+			cl::NullRange,
+			NULL,
+			&event_);
 		queue_.finish();
 		// copy the in out in the in buffer (except for the last time)
 		if (i < (max_iterations_ - 1)) {
@@ -268,14 +275,13 @@ time_duration cl_cellular_automata::run_image(std::vector<char>& out) {
 	}
 	after = microsec_clock::universal_time();
 	err_ = queue_.enqueueReadImage(
-		cl_image_out_, 
-		CL_TRUE, 
-		origin_, 
-		region_, 
-		mdx_ * sizeof(char), 
-		0, 
+		cl_image_out_,
+		CL_TRUE,
+		origin_,
+		region_,
+		mdx_ * sizeof(char),
+		0,
 		(void*)&out[0]);
 	queue_.finish();
 	return (after - before);
 }
-
