@@ -19,15 +19,15 @@ LIBS= -L/usr/local/lib \
 	-lOpenCL \
 	-lboost_program_options -lboost_system
 endif
-ALL=test 
+ALL=list_device
 
 all: $(ALL)
 
 test.o : test.cpp
 	$(CXX) -o test.o -c test.cpp $(CFLAGS)
 
-test : test.o
-	$(CXX) -o test test.o $(LIBS)
+list_device : test.o
+	$(CXX) -o list_device test.o $(LIBS)
 
 clean:
 	rm -f $(ALL) *.o
