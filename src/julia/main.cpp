@@ -136,16 +136,16 @@ int main(int ac, char** av) {
 	try {
 		if (!no_window) {
 			win_julia wjulia(
-				std::make_pair<float, float>(cx, cy),
+				std::make_pair(cx, cy),
 				radius,
-				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+				std::make_pair(max_width, max_height),
 				enable_gpu,
 				device,
 				enable_image,
 				max_iterations);
 			glut_win* pwin = glut_win::instance(
 				std::string("Julia"),
-				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+				std::make_pair(max_width, max_height),
 				&wjulia);
 			pwin->run();
 		} else {
@@ -154,9 +154,9 @@ int main(int ac, char** av) {
 			cl_julia* pjulia = new cl_julia(enable_gpu, device);
 			pjulia->init();
 			pjulia->setup(
-				std::make_pair<float, float>(cx, cy),
+				std::make_pair(cx, cy),
 				radius,
-				std::make_pair<unsigned int, unsigned int>(max_height, max_width),
+				std::make_pair(max_height, max_width),
 				max_iterations);
 			time_duration best_time = minutes(60);
 			for (int i = 0; i < nb_loops; ++i) {

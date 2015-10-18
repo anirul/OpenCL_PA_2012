@@ -154,8 +154,8 @@ void cl_julia::prepare_buffer() {
 	queue_.finish();
 	//prepare new value for c
 	angle_ += 0.01f;
-	cl_c_.x = c_.first + r_ * sin(angle_);
-	cl_c_.y = c_.second + r_ * cos(angle_);
+	cl_c_.s[0] = c_.first + r_ * sin(angle_);
+	cl_c_.s[1] = c_.second + r_ * cos(angle_);
 	//set the arguements of our kernel
 	err_ = kernel_.setArg(0, cl_buffer_out_);
 	err_ = kernel_.setArg(1, cl_c_);
@@ -187,8 +187,8 @@ void cl_julia::prepare_image() {
 	queue_.finish();
 	//prepare new value for c
 	angle_ += 0.01f;
-	cl_c_.x = c_.first + r_ * sin(angle_);
-	cl_c_.y = c_.second + r_ * cos(angle_);
+	cl_c_.s[0] = c_.first + r_ * sin(angle_);
+	cl_c_.s[1] = c_.second + r_ * cos(angle_);
 	//set the arguements of our kernel_
 	err_ = kernel_.setArg(0, cl_image_out_);
 	err_ = kernel_.setArg(1, cl_c_);

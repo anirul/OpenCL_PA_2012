@@ -5,10 +5,17 @@ UNAME = $(shell uname)
 ifeq ($(UNAME), Darwin)
 CC=clang
 CXX=clang++
-CFLAGS = -g -O0 -I/opt/local/include -I/opt/local/include/opencv2 -I..
-LIBS= -L/opt/local/lib/ \
+CFLAGS = -g -O0 \
+	-I/opt/local/include \
+	-I/usr/local/include \
+	-I/opt/local/include/opencv2 \
+	-I..
+LIBS= \
+	-L/opt/local/lib/ \
+	-L/usr/local/lib/ \
 	-framework OpenCL \
-	-lboost_program_options-mt -lboost_system-mt
+	-lboost_program_options-mt \
+	-lboost_system-mt
 endif
 
 ifeq ($(UNAME), Linux)
@@ -31,4 +38,3 @@ list_device : test.o
 
 clean:
 	rm -f $(ALL) *.o
-

@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -137,7 +138,7 @@ int main(int ac, char** av) {
 			win_cellular_automata* pwca = NULL;
 			if (enable_image)
 				pwca = new win_cellular_automata(
-					std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+					std::make_pair(max_width, max_height),
 					initial_image,
 					cl_file,
 					enable_gpu,
@@ -145,7 +146,7 @@ int main(int ac, char** av) {
 					max_iterations);
 			else
 				pwca = new win_cellular_automata(
-					std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+					std::make_pair(max_width, max_height),
 					initial_buffer,
 					cl_file,
 					enable_gpu,
@@ -153,7 +154,7 @@ int main(int ac, char** av) {
 					max_iterations);
 			glut_win* pwin = glut_win::instance(
 				std::string("Cellular Automata"),
-				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+				std::make_pair(max_width, max_height),
 				pwca);
 			pwin->run();
 			delete pwca;
@@ -161,7 +162,7 @@ int main(int ac, char** av) {
 			cl_cellular_automata cca(enable_gpu, device);
 			cca.init("life.cl");
 			cca.setup(
-				std::make_pair<unsigned int, unsigned int>(max_width, max_height),
+				std::make_pair(max_width, max_height),
 				max_iterations);
 			time_duration best_time = minutes(60);
 			for (int i = 0; i < nb_loops; ++i) {

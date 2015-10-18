@@ -46,7 +46,7 @@ class txt_file : public std::vector<T> {
       void import_file(const std::string& name) throw(std::exception) {
          std::ifstream ifs;
          ifs.open(name.c_str());
-         if (!ifs.is_open()) 
+         if (!ifs.is_open())
             throw std::runtime_error("Could not open file : " + name);
          std::string line = "";
          while (std::getline(ifs, line)) {
@@ -56,11 +56,11 @@ class txt_file : public std::vector<T> {
             while (std::getline(ss, item, ' ')) {
                if (item.size() == 0) continue;
                T value;
-               value.x = atof(item.c_str());
-               value.y = 0.0;
+               value.s[0] = atof(item.c_str());
+               value.s[1] = 0.0;
                this->push_back(value);
             }
-         } 
+         }
          ifs.close();
       }
 
@@ -78,7 +78,7 @@ class txt_file : public std::vector<T> {
 std::ostream& operator<<(std::ostream& os, const txt_file<cl_float2>& in) {
    std::vector<cl_float2>::const_iterator ite;
    for (ite = in.begin(); ite != in.end(); ++ite) {
-      os << (*ite).x << std::endl;
+      os << (*ite).s[0] << std::endl;
    }
    return os;
 }
@@ -86,7 +86,7 @@ std::ostream& operator<<(std::ostream& os, const txt_file<cl_float2>& in) {
 std::ostream& operator<<(std::ostream& os, const txt_file<cl_double2>& in) {
    std::vector<cl_double2>::const_iterator ite;
    for (ite = in.begin(); ite != in.end(); ++ite) {
-      os << (*ite).x << std::endl;
+      os << (*ite).s[0] << std::endl;
    }
    return os;
 }
@@ -114,7 +114,7 @@ class txt_file<std::complex<T> > : public std::vector<std::complex<T> > {
       void import_file(const std::string& name) throw(std::exception) {
          std::ifstream ifs;
          ifs.open(name.c_str());
-         if (!ifs.is_open()) 
+         if (!ifs.is_open())
             throw std::runtime_error("Could not open file : " + name);
          std::string line = "";
          while (std::getline(ifs, line)) {
@@ -128,7 +128,7 @@ class txt_file<std::complex<T> > : public std::vector<std::complex<T> > {
                value.imag() = 0.0f;
                this->push_back(value);
             }
-         } 
+         }
          ifs.close();
       }
 
@@ -152,4 +152,3 @@ std::ostream& operator<<(std::ostream& os, const txt_file<std::complex<T> >& in)
 }
 
 #endif
-

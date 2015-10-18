@@ -45,7 +45,7 @@ void ewd_file::import_file(const std::string& name) throw(std::exception)
 {
    std::ifstream ifs;
    ifs.open(name.c_str());
-   if (!ifs.is_open()) 
+   if (!ifs.is_open())
       throw std::runtime_error("Could not open file : " + name);
    ifs >> nb_vector_;
    if (nb_vector_ == 0)
@@ -70,7 +70,7 @@ void ewd_file::import_file(const std::string& name) throw(std::exception)
          throw std::runtime_error(ss.str());
       }
       if (v2 >= nb_vector_) {
-         ss << " invalid second vector : " << v2; 
+         ss << " invalid second vector : " << v2;
          throw std::runtime_error(ss.str());
       }
       if (d <= 0.0f) {
@@ -78,8 +78,8 @@ void ewd_file::import_file(const std::string& name) throw(std::exception)
          throw std::runtime_error(ss.str());
       }
       edges_.insert(
-            std::make_pair<std::pair<unsigned int , unsigned int>, float>(
-               std::make_pair<unsigned int, unsigned int>(v1, v2),
+            std::make_pair(
+               std::make_pair(v1, v2),
                d));
    }
    std::cout << std::endl;
@@ -97,11 +97,11 @@ void ewd_file::export_file(const std::string& name) throw(std::exception)
 }
 
 float ewd_file::dist(unsigned int v1, unsigned int v2) const {
-   if (v1 == v2) 
+   if (v1 == v2)
       return 0.0f;
    std::map<std::pair<unsigned int, unsigned int>, float>::const_iterator ite;
-   ite = edges_.find(std::make_pair<unsigned int, unsigned int>(v1, v2));
-   if (ite == edges_.end()) 
+   ite = edges_.find(std::make_pair(v1, v2));
+   if (ite == edges_.end())
       return huge_float;
    return ite->second;
 }
@@ -118,8 +118,8 @@ void ewd_file::import_matrix(float* p, size_t size) throw(std::exception)
          float distance = p[x + (y * nb_vector_)];
          if (distance < huge_float) {
             edges_.insert(
-                  std::make_pair<std::pair<unsigned int , unsigned int>, float>(
-                     std::make_pair<unsigned int, unsigned int>(x, y),
+                  std::make_pair(
+                     std::make_pair(x, y),
                      distance));
          }
       }
@@ -131,7 +131,7 @@ void ewd_file::export_matrix(float* p, size_t size) throw(std::exception)
    if ((nb_vector_ * nb_vector_) != size)
       throw std::runtime_error("Unmatched size!");
    for (int x = 0; x < nb_vector_; ++x) {
-      std::cout 
+      std::cout
          << "Export matrix line [" << x + 1 << "/" << nb_vector_ << "]\r";
       std::cout.flush();
       for (int y = 0; y < nb_vector_; ++y) {
@@ -160,11 +160,10 @@ std::ostream& ewd_file::operator<<(std::ostream& os) {
    os << nb_edges_ << std::endl;
    std::map<std::pair<unsigned int, unsigned int>, float>::const_iterator ite;
    for (ite = edges_.begin(); ite != edges_.end(); ++ite) {
-      os 
-         << ite->first.first << "\t" 
+      os
+         << ite->first.first << "\t"
          << ite->first.second << "\t"
          << ite->second << std::endl;
    }
    return os;
 }
-
